@@ -13,17 +13,21 @@ services:
   runner:
     restart: always
     image: registry.gitlab.com/gitlab-org/gitlab-runner:alpine
+    configs:
+      - source: gitlab-runner-config
+        target: /etc/gitlab-runner/config.toml
     volumes:
-      - runner-config:/etc/gitlab-runner:z
       - runner-cache:/cache
       ###- /var/run/docker.sock:/var/run/docker.sock
     environment:
       - DOCKER_HOST=tcp://dind:2375
 
+configs:
+  gitlab-runner-config:
+    file: ./config/config.toml
+
 volumes:
   dind-docker-data:
-    driver: local
-  runner-config:
     driver: local
   runner-cache:
     driver: local
