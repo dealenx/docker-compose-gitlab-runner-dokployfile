@@ -1,0 +1,7 @@
+{
+  "name": "GitLab Runner with DinD",
+  "description": "GitLab Runner с поддержкой Docker-in-Docker (DinD). Позволяет запускать Docker-контейнеры внутри CI/CD задач.",
+  "version": "1.0.0",
+  "tags": ["GitLab", "Runner", "CI/CD", "Docker", "DinD"],
+  "logo": "gitlab.svg"
+}

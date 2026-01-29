@@ -1,0 +1,11 @@
+version: "1"
+meta:
+  slug: "gitlab-runner-dind"
+  name: "GitLab Runner with DinD"
+  version: "1.0.0"
+  description: "GitLab Runner с поддержкой Docker-in-Docker (DinD). Позволяет запускать Docker-контейнеры внутри CI/CD задач."
+  logo: "gitlab.svg"
+  tags: ["GitLab", "Runner", "CI/CD", "Docker", "DinD"]
+template:
+  compose: "docker-compose.yml"
+  config: "template.toml"

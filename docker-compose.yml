@@ -1,6 +1,6 @@
 services:
   dind:
-    image: docker:20-dind
+    image: docker:24-dind
     restart: always
     privileged: true
     environment:
@@ -11,13 +11,48 @@ services:
       - dind-docker-data:/var/lib/docker
 
   runner:
-    restart: always
     image: registry.gitlab.com/gitlab-org/gitlab-runner:alpine
+    restart: always
+    depends_on:
+      - dind
+    environment:
+      - DOCKER_HOST=tcp://dind:2375
+      - CI_SERVER_URL=${gitlab_url}
+      - REGISTRATION_TOKEN=${registration_token}
+      - RUNNER_NAME=${runner_name}
+      - RUNNER_EXECUTOR=docker
+      - DOCKER_IMAGE=${default_image}
+      - REGISTER_NON_INTERACTIVE=true
+      - DOCKER_PRIVILEGED=true
     volumes:
       - runner-config:/etc/gitlab-runner
       - runner-cache:/cache
-    environment:
-      - DOCKER_HOST=tcp://dind:2375
+    configs:
+      - source: runner_config
+        target: /etc/gitlab-runner/config.toml
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        cp /etc/gitlab-runner/config.toml /tmp/config.toml
+        if ! grep -q "token =" /tmp/config.toml; then
+          echo "Registering runner..."
+          gitlab-runner register \
+            --non-interactive \
+            --config /tmp/config.toml \
+            --url "$${CI_SERVER_URL}" \
+            --registration-token "$${REGISTRATION_TOKEN}" \
+            --executor "docker" \
+            --docker-image "$${DOCKER_IMAGE}" \
+            --name "$${RUNNER_NAME}" \
+            --docker-privileged \
+            --docker-network-mode "bridge"
+        fi
+        exec gitlab-runner run --config /tmp/config.toml --user=gitlab-runner --working-directory=/home/gitlab-runner
+
+configs:
+  runner_config:
+    external: true
 
 volumes:
   dind-docker-data:

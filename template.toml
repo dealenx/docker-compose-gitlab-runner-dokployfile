@@ -1,0 +1,19 @@
+[variables]
+runner_name = "dokploy-runner"
+gitlab_url = "https://gitlab.com/"
+registration_token = ""
+default_image = "alpine:latest"
+concurrent_tasks = "1"
+
+[config]
+
+[[config.configs]]
+name = "runner_config"
+content = """
+concurrent = ${concurrent_tasks}
+check_interval = 0
+shutdown_timeout = 0
+
+[session_server]
+  session_timeout = 1800
+"""
