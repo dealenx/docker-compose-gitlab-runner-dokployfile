@@ -7,14 +7,9 @@ concurrent_tasks = { label = "Concurrent Tasks", default = "1" }
 
 [config]
 env = [
-  "runner_name=${runner_name}",
-  "gitlab_url=${gitlab_url}",
-  "registration_token=${registration_token}",
-  "default_image=${default_image}",
-  "concurrent_tasks=${concurrent_tasks}"
+  "RUNNER_NAME=${runner_name}",
+  "CI_SERVER_URL=${gitlab_url}",
+  "REGISTRATION_TOKEN=${registration_token}",
+  "DOCKER_IMAGE=${default_image}",
+  "CONCURRENT_TASKS=${concurrent_tasks}"
 ]
-
-[[config.mounts]]
-serviceName = "runner"
-filePath = "/etc/gitlab-runner/config.toml"
-content = "concurrent = ${concurrent_tasks}\ncheck_interval = 0\nshutdown_timeout = 0\n\n[session_server]\n  session_timeout = 1800"

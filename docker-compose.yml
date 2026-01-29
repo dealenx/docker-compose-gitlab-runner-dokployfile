@@ -17,32 +17,33 @@ services:
       - dind
     environment:
       - DOCKER_HOST=tcp://dind:2375
-      - CI_SERVER_URL=${gitlab_url}
-      - REGISTRATION_TOKEN=${registration_token}
-      - RUNNER_NAME=${runner_name}
+      - CI_SERVER_URL=${CI_SERVER_URL}
+      - REGISTRATION_TOKEN=${REGISTRATION_TOKEN}
+      - RUNNER_NAME=${RUNNER_NAME}
       - RUNNER_EXECUTOR=docker
-      - DOCKER_IMAGE=${default_image}
+      - DOCKER_IMAGE=${DOCKER_IMAGE}
       - REGISTER_NON_INTERACTIVE=true
       - DOCKER_PRIVILEGED=true
+      - CONCURRENT_TASKS=${CONCURRENT_TASKS}
     volumes:
       - runner-config:/etc/gitlab-runner
       - runner-cache:/cache
-    # Мы НЕ указываем конфиг здесь, Dokploy сам добавит его через mounts
     entrypoint:
       - /bin/sh
       - -c
       - |
-        # Ожидаем, пока Dokploy смонтирует файл. 
-        # Если файла нет, создаем минимальный, чтобы cp не упал.
+        # Генерируем конфиг полностью в entrypoint, чтобы избежать проблем с монтированием
         mkdir -p /etc/gitlab-runner
-        if [ ! -f /etc/gitlab-runner/config.toml ]; then
-          echo "concurrent = $${concurrent_tasks}" > /etc/gitlab-runner/config.toml
-        fi
+        cat <<EOF > /tmp/config.toml
+        concurrent = $${CONCURRENT_TASKS}
+        check_interval = 0
+        shutdown_timeout = 0
 
-        # Копируем во временный файл для работы
-        cp /etc/gitlab-runner/config.toml /tmp/config.toml
-        
-        if ! grep -q "token =" /tmp/config.toml; then
+        [session_server]
+          session_timeout = 1800
+        EOF
+
+        if [ ! -f /etc/gitlab-runner/config.toml ] || ! grep -q "token =" /etc/gitlab-runner/config.toml; then
           echo "Registering runner..."
           gitlab-runner register \
             --non-interactive \
@@ -54,6 +55,10 @@ services:
             --name "$${RUNNER_NAME}" \
             --docker-privileged \
             --docker-network-mode "bridge"
+          
+          cp /tmp/config.toml /etc/gitlab-runner/config.toml
+        else
+          cp /etc/gitlab-runner/config.toml /tmp/config.toml
         fi
         
         exec gitlab-runner run --config /tmp/config.toml --user=gitlab-runner --working-directory=/home/gitlab-runner
