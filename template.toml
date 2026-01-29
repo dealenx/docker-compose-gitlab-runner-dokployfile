@@ -5,8 +5,14 @@ registration_token = ""
 default_image = "alpine:latest"
 concurrent_tasks = "1"
 
-[config]
+[config.env]
+runner_name = "${runner_name}"
+gitlab_url = "${gitlab_url}"
+registration_token = "${registration_token}"
+default_image = "${default_image}"
+concurrent_tasks = "${concurrent_tasks}"
 
+[config]
 [[config.configs]]
 name = "runner_config"
 content = """
