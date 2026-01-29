@@ -1,15 +1,7 @@
-[variables]
-runner_name = { label = "Runner Name/ID", default = "dokploy-runner" }
-gitlab_url = { label = "GitLab URL", default = "https://gitlab.com/" }
-registration_token = { label = "Registration Token", default = "" }
-default_image = { label = "Default Docker Image", default = "alpine:latest" }
-concurrent_tasks = { label = "Concurrent Tasks", default = "1" }
-
 [config]
-env = [
-  "RUNNER_NAME=${runner_name}",
-  "CI_SERVER_URL=${gitlab_url}",
-  "REGISTRATION_TOKEN=${registration_token}",
-  "DOCKER_IMAGE=${default_image}",
-  "CONCURRENT_TASKS=${concurrent_tasks}"
-]
+[config.env]
+RUNNER_NAME="dokploy-runner"
+GITLAB_URL="https://gitlab.com/"
+REGISTRATION_TOKEN=""
+DEFAULT_IMAGE="alpine:latest"
+CONCURRENT_TASKS="1"
