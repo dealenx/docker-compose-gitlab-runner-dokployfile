@@ -27,14 +27,14 @@ services:
     volumes:
       - runner-config:/etc/gitlab-runner
       - runner-cache:/cache
-    configs:
-      - source: runner_config
-        target: /etc/gitlab-runner/config.toml
     entrypoint:
       - /bin/sh
       - -c
       - |
+        # Мы используем монтирование через template.toml (config.mounts)
+        # Копируем конфиг во временный файл, чтобы он был доступен для записи при регистрации
         cp /etc/gitlab-runner/config.toml /tmp/config.toml
+        
         if ! grep -q "token =" /tmp/config.toml; then
           echo "Registering runner..."
           gitlab-runner register \
@@ -48,11 +48,8 @@ services:
             --docker-privileged \
             --docker-network-mode "bridge"
         fi
+        
         exec gitlab-runner run --config /tmp/config.toml --user=gitlab-runner --working-directory=/home/gitlab-runner
-
-configs:
-  runner_config:
-    external: true
 
 volumes:
   dind-docker-data:

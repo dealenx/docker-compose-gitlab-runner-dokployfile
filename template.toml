@@ -13,8 +13,9 @@ default_image = "${default_image}"
 concurrent_tasks = "${concurrent_tasks}"
 
 [config]
-[[config.configs]]
-name = "runner_config"
+[[config.mounts]]
+serviceName = "runner"
+filePath = "/etc/gitlab-runner/config.toml"
 content = """
 concurrent = ${concurrent_tasks}
 check_interval = 0
