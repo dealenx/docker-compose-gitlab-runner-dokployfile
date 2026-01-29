@@ -1,26 +1,20 @@
 [variables]
-runner_name = "dokploy-runner"
-gitlab_url = "https://gitlab.com/"
-registration_token = ""
-default_image = "alpine:latest"
-concurrent_tasks = "1"
-
-[config.env]
-runner_name = "${runner_name}"
-gitlab_url = "${gitlab_url}"
-registration_token = "${registration_token}"
-default_image = "${default_image}"
-concurrent_tasks = "${concurrent_tasks}"
+runner_name = { label = "Runner Name/ID", default = "dokploy-runner" }
+gitlab_url = { label = "GitLab URL", default = "https://gitlab.com/" }
+registration_token = { label = "Registration Token", default = "" }
+default_image = { label = "Default Docker Image", default = "alpine:latest" }
+concurrent_tasks = { label = "Concurrent Tasks", default = "1" }
 
 [config]
+env = [
+  "runner_name=${runner_name}",
+  "gitlab_url=${gitlab_url}",
+  "registration_token=${registration_token}",
+  "default_image=${default_image}",
+  "concurrent_tasks=${concurrent_tasks}"
+]
+
 [[config.mounts]]
 serviceName = "runner"
 filePath = "/etc/gitlab-runner/config.toml"
-content = """
-concurrent = ${concurrent_tasks}
-check_interval = 0
-shutdown_timeout = 0
-
-[session_server]
-  session_timeout = 1800
-"""
+content = "concurrent = ${concurrent_tasks}\ncheck_interval = 0\nshutdown_timeout = 0\n\n[session_server]\n  session_timeout = 1800"
