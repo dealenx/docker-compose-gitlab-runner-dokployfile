@@ -27,12 +27,19 @@ services:
     volumes:
       - runner-config:/etc/gitlab-runner
       - runner-cache:/cache
+    # Мы НЕ указываем конфиг здесь, Dokploy сам добавит его через mounts
     entrypoint:
       - /bin/sh
       - -c
       - |
-        # Мы используем монтирование через template.toml (config.mounts)
-        # Копируем конфиг во временный файл, чтобы он был доступен для записи при регистрации
+        # Ожидаем, пока Dokploy смонтирует файл. 
+        # Если файла нет, создаем минимальный, чтобы cp не упал.
+        mkdir -p /etc/gitlab-runner
+        if [ ! -f /etc/gitlab-runner/config.toml ]; then
+          echo "concurrent = $${concurrent_tasks}" > /etc/gitlab-runner/config.toml
+        fi
+
+        # Копируем во временный файл для работы
         cp /etc/gitlab-runner/config.toml /tmp/config.toml
         
         if ! grep -q "token =" /tmp/config.toml; then
